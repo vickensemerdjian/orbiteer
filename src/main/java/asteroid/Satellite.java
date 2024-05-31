@@ -7,52 +7,55 @@ public class Satellite {
     private double bMass;
     private double bRadius;
     private double distance;
-    private double G = 6.67*(Math.pow(10, -11));
+    private double G = 6.67e-11; // Gravitational constant
     private long initialTime;
 
     public Satellite() {
-        initialTime = System.currentTimeMillis();
+        // Empty constructor
     }
 
-    public void setMass(double a, double b){
+    public void setMass(double a, double b) {
         aMass = a;
         bMass = b;
     }
 
-    public void setDistances(double a, double b, double d){
+    public void setDistances(double a, double b, double d) {
         aRadius = a;
         bRadius = b;
-        distance = d+aRadius+bRadius;
+        distance = d + aRadius + bRadius;
     }
 
-    public double baryCenter(){
-//the double returned by baryCenter is the distance of the center of mass from the more massive body
-        if(aMass > bMass){
-            return (distance*bMass)/(aMass+bMass);
-        }
-        if(bMass > aMass){
-            return (distance*aMass)/(bMass+aMass);
-        }
-        else{
-            return distance/2;
+    public double baryCenter() {
+        // Returns the distance of the center of mass from the more massive body
+        if (aMass > bMass) {
+            return (distance * bMass) / (aMass + bMass);
+        } else if (bMass > aMass) {
+            return (distance * aMass) / (bMass + aMass);
+        } else {
+            return distance / 2;
         }
     }
-    public double ForceGrav(){
-        return G*((aMass*bMass)/(distance*distance));
-    }
-    private double period(){
-        double rcubed = Math.pow(distance, 3.0);
-        return Math.sqrt(((4*9.8696)/(G*(aMass+bMass)))*rcubed);
-    }
-    public double angVelo(){
-        return 6.18/period();
+
+    public double forceGrav() {
+        // Returns the gravitational force between the two bodies
+        return G * ((aMass * bMass) / (distance * distance));
     }
 
+    public double period() {
+        // Returns the orbital period of the system
+        double rCubed = Math.pow(distance, 3.0);
+        return Math.sqrt(((4 * Math.PI * Math.PI) / (G * (aMass + bMass))) * rCubed);
+    }
 
+    public double angVelo() {
+        // Returns the angular velocity of the system
+        return (2 * Math.PI) / period();
+    }
 
+    public void initializeTime() {
+        initialTime = System.currentTimeMillis();
+    }
 
-
-    // Method to get current position based on time
     public double[] getPositions(long currentTime) {
         double elapsedTime = (currentTime - initialTime) / 1000.0; // seconds
         double period = period();
@@ -69,6 +72,7 @@ public class Satellite {
 
         return new double[]{aX, aY, bX, bY};
     }
+
     public double getAMassRadius() {
         return aRadius;
     }
@@ -77,5 +81,11 @@ public class Satellite {
         return bRadius;
     }
 
-}
+    public double getDistance() {
+        return distance;
+    }
 
+    public long getInitialTime() {
+        return initialTime;
+    }
+}
