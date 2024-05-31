@@ -1,5 +1,5 @@
 package asteroid;
-
+import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -12,6 +12,8 @@ public class Window {
     private String title;
     private long glfwWindow;
     private Satellite satellite;
+    private double scalingFactor = 1.0; // Initial scaling factor
+    private double maxBodySize = 12742.0; // Maximum body size in kilometers (Earth's diameter)
 
     private static Window window = null;
 
@@ -31,7 +33,11 @@ public class Window {
 
     public void run(double aMass, double aRadius, double bMass, double bRadius, double distance) {
         System.out.println("Opened your visualization in a new window: LWJGL Version " + Version.getVersion());
-
+        double per;
+        double G = 6.67e-11;
+        double rCubed = Math.pow(distance, 3.0);
+        per = Math.sqrt(((4 * Math.PI * Math.PI) / (G * (aMass + bMass))) * rCubed);
+        System.out.println("your Orbital Period is " + per + " seconds.");
         // Set satellite properties
         satellite.setMass(aMass, bMass);
         satellite.setDistances(aRadius, bRadius, distance);
@@ -72,6 +78,12 @@ public class Window {
         glLoadIdentity();
         double aspectRatio = (double) width / height;
         glOrtho(-aspectRatio, aspectRatio, -1.0, 1.0, -1.0, 1.0);
+
+// Calculate the scaling factor based on the maximum body size
+        double maxBodyRadius = maxBodySize / 2.0; // Earth's radius in kilometers
+        double maxViewportRadius = Math.min(width, height) / 2.0; // Maximum viewport radius in pixels
+        scalingFactor = maxViewportRadius / maxBodyRadius; // Scaling factor to fit the Earth within the viewport
+
         glMatrixMode(GL_MODELVIEW);
 
         // Set the clear color (background color)
@@ -91,6 +103,7 @@ public class Window {
 
             // Clear the framebuffer
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
             // Render satellites
             renderSatellites();
@@ -136,14 +149,14 @@ public class Window {
 
     private void renderSatellite(double x, double y, double radius, float red, float green, float blue, float alpha) {
         glPushMatrix();
-        glTranslated(x, y, 0);
+        glTranslated(x * scalingFactor, y * scalingFactor, 0);
         glColor4f(red, green, blue, alpha);
         glBegin(GL_POLYGON);
-        int segments = 50; // Reduce number of segments for smoother rendering
+        int segments = 50;
         for (int i = 0; i < segments; i++) {
             double theta = 2.0 * Math.PI * i / segments;
-            double dx = radius * Math.cos(theta);
-            double dy = radius * Math.sin(theta);
+            double dx = (radius * scalingFactor) * Math.cos(theta);
+            double dy = (radius * scalingFactor) * Math.sin(theta);
             glVertex2d(dx, dy);
         }
         glEnd();
