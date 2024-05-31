@@ -67,6 +67,13 @@ public class Window {
         glfwMakeContextCurrent(glfwWindow);
         GL.createCapabilities();
 
+        // Set up the projection matrix
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        double aspectRatio = (double) width / height;
+        glOrtho(-aspectRatio, aspectRatio, -1.0, 1.0, -1.0, 1.0);
+        glMatrixMode(GL_MODELVIEW);
+
         // Set the clear color (background color)
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Dark gray background
 
